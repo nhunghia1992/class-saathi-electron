@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+/* General scrollbar styles */
+::-webkit-scrollbar {
+    /* Scrollbar width */
+    width: 8px !important;
+    /* Scrollbar height for horizontal bars */
+    height: 8px !important;
+}
+
+/* Scrollbar track */
+::-webkit-scrollbar-track {
+    /* Light background */
+    background-color: rgba(0, 0, 0, 0.1);
+    /* Rounded corners */
+    border-radius: 4px;
+}
+
+/* Scrollbar thumb */
+::-webkit-scrollbar-thumb {
+    /* Subtle gray color */
+    background-color: rgba(0, 0, 0, 0.4);
+    /* Rounded corners */
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+/* Hover effect */
+::-webkit-scrollbar-thumb:hover {
+    /* Darker color on hover */
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+/* For Firefox */
+@-moz-document url-prefix() {
+    * {
+        /* Thin scrollbar */
+        scrollbar-width: thin;
+        /* Thumb color and track color */
+        scrollbar-color: rgba(0, 0, 0, 0.4) rgba(0, 0, 0, 0.1);
+    }
+}
+
+.hide-scrollbar {
+    /* Internet Explorer 10+ */
+    -ms-overflow-style: none;
+    /* Firefox */
+    scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+    /* Safari and Chrome */
+    display: none;
+}
