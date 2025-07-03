@@ -34,7 +34,8 @@ const isStudentFinishedAnswer = computed<boolean>(() => {
         && isPlaying
         && question.currentQuestion
         && clickerInfo.answers[question.currentQuestionIndex]
-        && clickerInfo.answers[question.currentQuestionIndex]?.choices?.length >= question.currentQuestion.choices.filter(choice => choice.isCorrected).length
+        && clickerInfo.answers[question.currentQuestionIndex].choices?.length > 0
+        && clickerInfo.answers[question.currentQuestionIndex].choices.length >= question.currentQuestion.choices.filter(choice => choice.isCorrected).length
     ) {
         return true
     }
@@ -78,7 +79,7 @@ watch(updateModal, () => {
     <div class="relative shrink inline-flex items-center bg-black/20 rounded-xl overflow-hidden">
         <XMarkIcon v-if="!isPlaying" class="size-4 absolute right-2 top-2 cursor-pointer" @click="deleteModal = true" />
         <div class="p-3 bg-black/20" :class="{
-            '!bg-emerald-400/70': clickerInfo.highlight || isStudentFinishedAnswer
+            '!bg-emerald-400/70': !isPlaying ? clickerInfo.highlight : isStudentFinishedAnswer
         }">
             <div class="flex items-center justify-center p-2 size-11 border-2 border-white rounded-full cursor-pointer"
                 @click="handleShowUpdateInfo">

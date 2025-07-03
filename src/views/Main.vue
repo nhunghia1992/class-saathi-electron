@@ -8,13 +8,18 @@ import Clicker from '../components/Clicker.vue';
 
 const device = useDeviceStore()
 const question = useQuestionStore()
-const countdownTime = ref<number>(3)
+const defaultCountdownTime = 4
+const countdownTime = ref<number>(defaultCountdownTime)
 const isShowCorrectedChoice = ref<boolean>(false)
 
 let countdownIntervalId: NodeJS.Timeout | null = null
 let questionTimeIntervalId: NodeJS.Timeout | null = null
 
 function startCountdown() {
+    if (countdownIntervalId) {
+        clearInterval(countdownIntervalId)
+    }
+
     countdownIntervalId = setInterval(() => {
         if (countdownTime.value > 0) {
             countdownTime.value--
@@ -27,6 +32,10 @@ function startCountdown() {
 }
 
 function startQuestionTimer() {
+    if (questionTimeIntervalId) {
+        clearInterval(questionTimeIntervalId)
+    }
+
     questionTimeIntervalId = setInterval(() => {
         if (question.currentQuestion && question.currentQuestion.timeLimit > 0) {
             question.currentQuestion.timeLimit--
@@ -45,15 +54,30 @@ function clearStudentAnswers() {
         if (clicker.role !== ClickerRole.student) continue;
         if (!clicker.answers[question.currentQuestionIndex]) continue;
 
-        clicker.answers[question.currentQuestionIndex].choices = []
-        clicker.answers[question.currentQuestionIndex].time = null
+        clicker.answers[question.currentQuestionIndex] = {
+            choices: [],
+            time: null
+        }
     }
 }
 
-watch(() => question.currentQuestionIndex, () => {
+function resetState() {
     if (countdownIntervalId) clearInterval(countdownIntervalId)
     if (questionTimeIntervalId) clearInterval(questionTimeIntervalId)
-    countdownTime.value = 3
+    countdownTime.value = defaultCountdownTime
+    isShowCorrectedChoice.value = false
+}
+
+function restartQuestion() {
+    if (!question.currentQuestion) return;
+
+    question.currentQuestion = JSON.parse(JSON.stringify(question.data[question.currentQuestionIndex]))
+    resetState()
+    clearStudentAnswers()
+}
+
+watch(() => question.currentQuestionIndex, () => {
+    resetState()
 })
 
 onMounted(() => {
@@ -70,24 +94,28 @@ onMounted(() => {
         const clicker = device.clickersMap[clickerId]
         // check user role
         if (clicker.role === ClickerRole.teacher) {
+            if (data.payload?.value === 1) {
+                startCountdown()
+            }
+
+            if (data.payload?.value === 2) {
+                isShowCorrectedChoice.value = !isShowCorrectedChoice.value
+            }
+
+            if (data.payload?.value === 4) {
+                clearStudentAnswers()
+            }
+
+            if (data.payload?.value === 5) {
+                restartQuestion()
+            }
+
             if (data.payload?.value === 6) {
                 question.currentQuestionIndex = question.currentQuestionIndex + 1 >= question.data.length ? question.currentQuestionIndex : question.currentQuestionIndex + 1
             }
 
             if (data.payload?.value === 7) {
                 question.currentQuestionIndex = question.currentQuestionIndex === 0 ? 0 : question.currentQuestionIndex - 1
-            }
-
-            if (data.payload?.value === 5) {
-                clearStudentAnswers()
-            }
-
-            if (data.payload?.value === 4) {
-                isShowCorrectedChoice.value = !isShowCorrectedChoice.value
-            }
-
-            if (data.payload?.value === 1) {
-                startCountdown()
             }
         }
 
@@ -113,14 +141,13 @@ onMounted(() => {
             const valueIndex = data.payload.value - 1
 
             // make sure user not select same choice and not answer over limit corrected choices
-            if (clicker.answers[question.currentQuestionIndex].choices.some(index => index === valueIndex)) return;
-            if (clicker.answers[question.currentQuestionIndex].choices.length >= question.currentQuestion.choices.filter(choice => choice.isCorrected).length) return;
-            clicker.answers[question.currentQuestionIndex].choices.push(valueIndex)
-
+            if (clicker.answers[question.currentQuestionIndex]!.choices.some(index => index === valueIndex)) return;
+            if (clicker.answers[question.currentQuestionIndex]!.choices.length >= question.currentQuestion.choices.filter(choice => choice.isCorrected).length) return;
+            clicker.answers[question.currentQuestionIndex]!.choices.push(valueIndex)
 
             // check if user finished answering to set time for answer
-            if (clicker.answers[question.currentQuestionIndex].choices.length < question.currentQuestion.choices.filter(choice => choice.isCorrected).length) return;
-            clicker.answers[question.currentQuestionIndex].time = question.currentQuestion.timeLimit
+            if (clicker.answers[question.currentQuestionIndex]!.choices.length < question.currentQuestion.choices.filter(choice => choice.isCorrected).length) return;
+            clicker.answers[question.currentQuestionIndex]!.time = question.currentQuestion.timeLimit
         }
     });
 });
@@ -129,13 +156,11 @@ onBeforeUnmount(() => {
     window.electron.remoteControl.unsubscribeEvents();
     window.electron.remoteControl.close();
 
-    if (countdownIntervalId) clearInterval(countdownIntervalId)
-    if (questionTimeIntervalId) clearInterval(questionTimeIntervalId)
+    resetState()
 });
 </script>
 
 <template>
-    {{ countdownTime }}
     <div class="grid grid-cols-2 gap-3 items-center h-full">
         <RenderQuestion v-if="question.currentQuestion" :question="question.currentQuestion"
             :isShowCorrectedChoice="isShowCorrectedChoice" />
@@ -145,13 +170,18 @@ onBeforeUnmount(() => {
         </div>
     </div>
     <div v-if="countdownTime"
-        class="absolute inset-0 bg-black/50 flex items-center justify-center font-semibold text-6xl transition-all ease-linear duration-1000"
+        class="absolute inset-0 bg-black/50 flex items-center justify-center font-semibold  transition-all ease-linear duration-1000"
         :class="{
+            'backdrop-blur-lg': countdownTime === 4,
             'backdrop-blur-md': countdownTime === 3,
             'backdrop-blur-xs': countdownTime === 2,
             'backdrop-blur-none': countdownTime === 1
         }">
-        Question {{ question.currentQuestionIndex + 1 }}
-        {{ countdownTime }}
+        <span v-if="countdownTime === defaultCountdownTime" class="text-6xl">
+            Question {{ question.currentQuestionIndex + 1 }}
+        </span>
+        <span v-else class="text-9xl">
+            {{ countdownTime }}
+        </span>
     </div>
 </template>

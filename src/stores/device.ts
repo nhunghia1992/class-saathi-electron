@@ -20,11 +20,17 @@ export const useDeviceStore = defineStore("device", () => {
             })
     })
 
-    const teacherClickers = computed(() => {
+    const teacherClickers = computed<{
+        id: string,
+        info: ClickerInfo
+    }[]>(() => {
         return clickers.value.filter(clicker => clicker.info.role === ClickerRole.teacher)
     })
 
-    const studentClickers = computed(() => {
+    const studentClickers = computed<{
+        id: string,
+        info: ClickerInfo
+    }[]>(() => {
         return clickers.value.filter(clicker => clicker.info.role === ClickerRole.student).sort((a, b) => {
             if (a.info.order && !b.info.order) return -1;
             if (!a.info.order && b.info.order) return 1;

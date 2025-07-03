@@ -3,10 +3,12 @@ export interface ClickerInfo {
     name?: string
     role: ClickerRole
     highlight: boolean
-    answers: {
-        time: number | null
-        choices: number[]
-    }[]
+    answers: Array<ClickerAnswer | null>
+}
+
+export interface ClickerAnswer {
+    time: number | null
+    choices: number[]
 }
 
 export enum ClickerRole {
