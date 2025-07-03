@@ -35,7 +35,7 @@ function handleUpdateInfo() {
 }
 
 watch(updateModal, () => {
-    if (updateModal.value) return;
+    if (!updateModal.value) return;
     updateInfo.value = { ...clickerInfo }
 })
 </script>

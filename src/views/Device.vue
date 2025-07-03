@@ -44,11 +44,14 @@ onMounted(() => {
 
         if (data.type === ClickerType.clicked) {
             const clickerId = data.payload?.id
-            if (clickerId && device.clickersMap[clickerId]) {
-                device.clickersMap[clickerId].highlight = true
-                setTimeout(() => {
+            if (clickerId) {
+                if (data.payload?.value === 6) {
+                    device.clickersMap[clickerId].highlight = true
+                }
+
+                if (data.payload?.value === 7) {
                     device.clickersMap[clickerId].highlight = false
-                }, 500)
+                }
             }
         }
     });

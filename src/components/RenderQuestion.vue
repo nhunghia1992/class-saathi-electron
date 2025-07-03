@@ -87,8 +87,8 @@ function numberToLetter(number: number) {
             <!-- Question choices -->
             <div class="grid gap-3" :class="gridColClass[question.choiceColumn]">
                 <div v-for="choice in questionChoicesOrder"
-                    class="flex items-center justify-center gap-5 w-full max-w-3xl mx-auto bg-black/30 py-3 px-4 rounded-lg">
-                    <div class="shrink-0 flex items-center justify-center size-12 bg-black/50 text-2xl rounded-full font-semibold"
+                    class="flex items-center justify-center gap-5 w-full max-w-3xl mx-auto bg-black/20 py-3 px-4 rounded-lg">
+                    <div class="shrink-0 flex items-center justify-center size-12 bg-black/20 text-2xl rounded-full font-semibold"
                         :class="{
                             '!bg-emerald-400': isShowAnswer && choice.isCorrected
                         }">
