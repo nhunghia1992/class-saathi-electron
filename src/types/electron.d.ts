@@ -12,7 +12,8 @@ declare global {
         unsubscribeEvents: () => void;
         startRegister: (classNumber: number, number: number, registrationKey: number) => void;
         finishRegister: () => void;
-      };
+      },
+      saveFile: (buffer: Uint8Array, filename: string) => Promise<string>
     };
   }
 }

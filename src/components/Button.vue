@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 interface Props {
-    color?: 'dark' | 'emerald' | 'rose'
+    color?: 'dark' | 'emerald' | 'rose' | 'sky'
     fill?: 'solid' | 'outline'
     size?: 'small' | 'normal' | 'large'
     design?: 'rounded' | 'pill'
@@ -18,6 +18,9 @@ const variantClass = {
     },
     rose: {
         solid: "text-white bg-rose-400"
+    },
+    sky: {
+        solid: 'text-white bg-sky-400'
     }
 }
 

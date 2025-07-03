@@ -1,7 +1,10 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
-import path from 'node:path';
+import { app, BrowserWindow, ipcMain, protocol, net } from 'electron';
 import started from 'electron-squirrel-startup';
 import { SerialPort } from 'serialport';
+import path from 'node:path';
+import fs from 'node:fs'
+import url from 'node:url'
+import mime from 'mime'
 
 let serialPort;
 let mainWindow;
@@ -18,7 +21,7 @@ const createWindow = () => {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: true, // Enable Node.js integration
+      webSecurity: false
     },
   });
 
@@ -48,6 +51,7 @@ app.whenReady().then(() => {
   });
 
   setupSerialportIPC();
+  setupSaveFile();
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -126,5 +130,15 @@ function setupSerialportIPC() {
         }
         break;
     }
+  });
+}
+
+function setupSaveFile() {
+  ipcMain.handle('save-file', async (_, buffer, filename) => {
+    const savePath = path.join(app.getPath('userData'), 'uploads');
+    if (!fs.existsSync(savePath)) fs.mkdirSync(savePath);
+    const fullPath = path.join(savePath, filename);
+    fs.writeFileSync(fullPath, Buffer.from(buffer));
+    return `file://${fullPath}`;
   });
 }

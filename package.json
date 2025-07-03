@@ -37,6 +37,7 @@
     "@tailwindcss/vite": "^4.1.8",
     "electron-squirrel-startup": "^1.0.1",
     "is-elevated": "^3.0.0",
+    "mime": "^4.0.7",
     "pinia": "^3.0.3",
     "pinia-plugin-persistedstate": "^4.3.0",
     "rxjs": "^6.5.2",
