@@ -5,6 +5,7 @@ export interface Question {
     contentColumn: 1 | 2
     choices: QuestionChoice[]
     choiceColumn: 1 | 2 | 3 | 4
+    timeLimit: number
 }
 
 export enum QuestionType {

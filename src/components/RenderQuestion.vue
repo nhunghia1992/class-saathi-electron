@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PencilIcon, PlusCircleIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+import { ClockIcon, PencilIcon, PlusCircleIcon, XMarkIcon } from '@heroicons/vue/24/outline';
 import { ContentType, Question, QuestionChoice, QuestionType } from '../types/question.d';
 import Button from './Button.vue';
 import { computed } from 'vue';
@@ -28,7 +28,7 @@ const questionChoicesOrder = computed<QuestionChoice[]>(() => {
     const choices = JSON.parse(JSON.stringify(question.choices))
     return choices.sort((a: QuestionChoice, b: QuestionChoice) => {
         if (question.type !== QuestionType.sorting) return 0;
-        if (!isPreview && !isShowAnswer) return 0;
+        if (!isShowAnswer) return 0;
         return a.isCorrected - b.isCorrected
     })
 })
@@ -43,6 +43,10 @@ function numberToLetter(number: number) {
     <div class="p-3 bg-black/20 mb-3 rounded-xl">
         <div class="flex items-center mb-3 gap-2">
             <div v-if="title" class="font-semibold text-lg underline">{{ title }}</div>
+            <div class="flex items-center gap-1">
+                <ClockIcon class="size-6" />
+                <div class="w-8">{{ question.timeLimit }}</div>
+            </div>
             <Button v-if="isPreview" color="dark" size="small" @click="emit('edit')">
                 <PencilIcon class="size-6 inline" />
                 Edit
@@ -52,7 +56,7 @@ function numberToLetter(number: number) {
                 <PlusCircleIcon class="size-6 inline" />
                 {{ questionType }}
             </Button>
-            <Button v-if="isPreview" color="rose" design="pill" class="size-7 !p-0 ml-auto" @click="emit('delete')">
+            <Button v-if="isPreview" color="rose" design="pill" class="size-7 !p-0 ml-auto shrink-0" @click="emit('delete')">
                 <XMarkIcon class="size-5" />
             </Button>
         </div>
@@ -86,7 +90,7 @@ function numberToLetter(number: number) {
                     class="flex items-center justify-center gap-5 w-full max-w-3xl mx-auto bg-black/30 py-3 px-4 rounded-lg">
                     <div class="shrink-0 flex items-center justify-center size-12 bg-black/50 text-2xl rounded-full font-semibold"
                         :class="{
-                            '!bg-emerald-400': (isPreview || isShowAnswer) && choice.isCorrected
+                            '!bg-emerald-400': isShowAnswer && choice.isCorrected
                         }">
                         {{numberToLetter(question.choices.findIndex(_choice => _choice.value === choice.value) + 1)}}
                     </div>

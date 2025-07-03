@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { PlusCircleIcon, XMarkIcon, FilmIcon, MusicalNoteIcon, PhotoIcon, CheckIcon } from '@heroicons/vue/24/outline';
-import { computed, ref } from 'vue';
+import { PlusCircleIcon, XMarkIcon, FilmIcon, MusicalNoteIcon, PhotoIcon, CheckIcon, ClockIcon, CheckBadgeIcon, CheckCircleIcon } from '@heroicons/vue/24/outline';
+import { ref } from 'vue';
 import Button from '../components/Button.vue';
 import Modal from '../components/Modal.vue';
 import { ContentType, Question, QuestionType } from '../types/question.d';
@@ -16,6 +16,8 @@ const questionSelectedIndex = ref<number | null>(null)
 const questionAction = ref<'add' | 'edit'>('add')
 
 const deleteModal = ref<boolean>(false)
+
+const showAnswer = ref<boolean>(false)
 
 const iconMap = {
     [ContentType.text]: PlusCircleIcon,
@@ -38,7 +40,8 @@ function handleAddQuestion(questionType: QuestionType, index: number | null) {
         contents: [],
         contentColumn: 1,
         choices: [],
-        choiceColumn: 1
+        choiceColumn: 1,
+        timeLimit: 30
     }
     questionAction.value = 'add'
     questionSelectedIndex.value = index
@@ -141,20 +144,31 @@ function handleConfirmDeleteQuestion() {
             <PlusCircleIcon class="size-6 inline" />
             {{ questionType }}
         </Button>
-        <Button v-if="question.data.length" color="rose" size="small" @click="handleDeleteAllQuestion">
-            <XMarkIcon class="size-6 inline" />
-            Delete All
-        </Button>
+        <div class="flex items-center gap-2 absolute right-8 z-20">
+            <Button v-if="question.data.length" :color="showAnswer ? 'emerald' : 'dark'" size="small"
+                @click="showAnswer = !showAnswer">
+                <CheckCircleIcon class="size-6 inline" />
+                Show answer
+            </Button>
+            <Button v-if="question.data.length" color="rose" size="small" @click="handleDeleteAllQuestion">
+                <XMarkIcon class="size-6 inline" />
+                Delete All
+            </Button>
+        </div>
     </div>
 
     <RenderQuestion v-for="(questionData, index) in question.data"
         :title="`Question ${index + 1} (${questionData.type})`" :question="questionData" :is-preview="true"
-        @edit="handleEditQuestion(index)" @add="handleAddQuestion($event, index)"
+        :is-show-answer="showAnswer" @edit="handleEditQuestion(index)" @add="handleAddQuestion($event, index)"
         @delete="handleDeleteQuestion(index)" />
 
     <Modal v-model="questionModal" size="full" static>
         <div class="flex items-center gap-2 mb-3">
             <div class="font-semibold text-lg underline">Question {{ questionSelected?.type }}</div>
+            <div class="flex items-center gap-1">
+                <ClockIcon class="size-6" />
+                <input v-if="questionSelected" v-model="questionSelected.timeLimit" type="number" class="w-8" />
+            </div>
             <div class="italic">
                 (
                 <select v-if="questionSelected?.questionColumn" v-model="questionSelected.questionColumn">
