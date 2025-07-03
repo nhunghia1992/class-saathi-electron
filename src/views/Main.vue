@@ -1,3 +1,157 @@
+<script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { useQuestionStore } from '../stores/question';
+import RenderQuestion from '../components/RenderQuestion.vue';
+import { ClickerData, ClickerRole, ClickerType } from '../types/device.d';
+import { useDeviceStore } from '../stores/device';
+import Clicker from '../components/Clicker.vue';
+
+const device = useDeviceStore()
+const question = useQuestionStore()
+const countdownTime = ref<number>(3)
+const isShowCorrectedChoice = ref<boolean>(false)
+
+let countdownIntervalId: NodeJS.Timeout | null = null
+let questionTimeIntervalId: NodeJS.Timeout | null = null
+
+function startCountdown() {
+    countdownIntervalId = setInterval(() => {
+        if (countdownTime.value > 0) {
+            countdownTime.value--
+        }
+        if (countdownTime.value <= 0 && countdownIntervalId) {
+            clearInterval(countdownIntervalId)
+            startQuestionTimer()
+        }
+    }, 1000)
+}
+
+function startQuestionTimer() {
+    questionTimeIntervalId = setInterval(() => {
+        if (question.currentQuestion && question.currentQuestion.timeLimit > 0) {
+            question.currentQuestion.timeLimit--
+        }
+
+        if (question.currentQuestion && question.currentQuestion.timeLimit <= 0 && questionTimeIntervalId) {
+            clearInterval(questionTimeIntervalId)
+        }
+    }, 1000)
+}
+
+function clearStudentAnswers() {
+    for (const clickerId in device.clickersMap) {
+        const clicker = device.clickersMap[clickerId]
+
+        if (clicker.role !== ClickerRole.student) continue;
+        if (!clicker.answers[question.currentQuestionIndex]) continue;
+
+        clicker.answers[question.currentQuestionIndex].choices = []
+        clicker.answers[question.currentQuestionIndex].time = null
+    }
+}
+
+watch(() => question.currentQuestionIndex, () => {
+    if (countdownIntervalId) clearInterval(countdownIntervalId)
+    if (questionTimeIntervalId) clearInterval(questionTimeIntervalId)
+    countdownTime.value = 3
+})
+
+onMounted(() => {
+    window.electron.remoteControl.open();
+
+    window.electron.remoteControl.subscribeEvents((data: ClickerData) => {
+        // check event type is user click
+        if (data.type !== ClickerType.clicked) return;
+
+        // make sure clicker is registered
+        const clickerId = data.payload?.id
+        if (!clickerId || !device.clickersMap[clickerId]) return;
+
+        const clicker = device.clickersMap[clickerId]
+        // check user role
+        if (clicker.role === ClickerRole.teacher) {
+            if (data.payload?.value === 6) {
+                question.currentQuestionIndex = question.currentQuestionIndex + 1 >= question.data.length ? question.currentQuestionIndex : question.currentQuestionIndex + 1
+            }
+
+            if (data.payload?.value === 7) {
+                question.currentQuestionIndex = question.currentQuestionIndex === 0 ? 0 : question.currentQuestionIndex - 1
+            }
+
+            if (data.payload?.value === 5) {
+                clearStudentAnswers()
+            }
+
+            if (data.payload?.value === 4) {
+                isShowCorrectedChoice.value = !isShowCorrectedChoice.value
+            }
+
+            if (data.payload?.value === 1) {
+                startCountdown()
+            }
+        }
+
+        if (clicker.role === ClickerRole.student) {
+            // check if question is started
+            if (countdownTime.value) return;
+
+            // check if question is ended
+            if (question.currentQuestion && question.currentQuestion.timeLimit <= 0) return;
+
+            // convert input signal value to index and check if it's valid in choice range
+            if (!data.payload?.value) return;
+            if (!question.currentQuestion?.choices[data.payload.value - 1]) return;
+
+            // re-init answer array
+            if (!clicker.answers[question.currentQuestionIndex]) {
+                clicker.answers[question.currentQuestionIndex] = {
+                    time: null,
+                    choices: []
+                }
+            }
+
+            const valueIndex = data.payload.value - 1
+
+            // make sure user not select same choice and not answer over limit corrected choices
+            if (clicker.answers[question.currentQuestionIndex].choices.some(index => index === valueIndex)) return;
+            if (clicker.answers[question.currentQuestionIndex].choices.length >= question.currentQuestion.choices.filter(choice => choice.isCorrected).length) return;
+            clicker.answers[question.currentQuestionIndex].choices.push(valueIndex)
+
+
+            // check if user finished answering to set time for answer
+            if (clicker.answers[question.currentQuestionIndex].choices.length < question.currentQuestion.choices.filter(choice => choice.isCorrected).length) return;
+            clicker.answers[question.currentQuestionIndex].time = question.currentQuestion.timeLimit
+        }
+    });
+});
+
+onBeforeUnmount(() => {
+    window.electron.remoteControl.unsubscribeEvents();
+    window.electron.remoteControl.close();
+
+    if (countdownIntervalId) clearInterval(countdownIntervalId)
+    if (questionTimeIntervalId) clearInterval(questionTimeIntervalId)
+});
+</script>
+
 <template>
-    <div>Main</div>
+    {{ countdownTime }}
+    <div class="grid grid-cols-2 gap-3 items-center h-full">
+        <RenderQuestion v-if="question.currentQuestion" :question="question.currentQuestion"
+            :isShowCorrectedChoice="isShowCorrectedChoice" />
+        <div class="flex flex-wrap gap-2 justify-center">
+            <Clicker v-for="clicker in device.studentClickers" :key="clicker.id" :clickerId="clicker.id"
+                :clickerInfo="clicker.info" :isPlaying="true" :isShowCorrectedChoice="isShowCorrectedChoice" />
+        </div>
+    </div>
+    <div v-if="countdownTime"
+        class="absolute inset-0 bg-black/50 flex items-center justify-center font-semibold text-6xl transition-all ease-linear duration-1000"
+        :class="{
+            'backdrop-blur-md': countdownTime === 3,
+            'backdrop-blur-xs': countdownTime === 2,
+            'backdrop-blur-none': countdownTime === 1
+        }">
+        Question {{ question.currentQuestionIndex + 1 }}
+        {{ countdownTime }}
+    </div>
 </template>

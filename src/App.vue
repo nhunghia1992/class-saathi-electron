@@ -28,7 +28,7 @@ function changeView(newView) {
                 </button>
             </div>
         </div>
-        <div class="h-full overflow-auto bg-blue-950/20 rounded-xl p-3">
+        <div class="h-full overflow-auto bg-blue-950/20 rounded-xl p-3 relative">
             <component :is="viewComponents[view]" />
         </div>
     </div>

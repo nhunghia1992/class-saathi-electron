@@ -1,8 +1,12 @@
 export interface ClickerInfo {
-    order?: number,
-    name?: string,
+    order?: number
+    name?: string
     role: ClickerRole
     highlight: boolean
+    answers: {
+        time: number | null
+        choices: number[]
+    }[]
 }
 
 export enum ClickerRole {

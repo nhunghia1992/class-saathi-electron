@@ -51,10 +51,10 @@ function onFileChange(event: Event) {
 <template>
     <div class="border-2 border-dashed border-neutral-500 rounded-lg p-2">
         <template v-if="model">
-            <img v-if="type === ContentType.image" :src="model" alt="Preview" class="w-full rounded-lg mx-auto mb-2" />
+            <img v-if="type === ContentType.image" :src="model" alt="Preview" class="rounded-lg mx-auto mb-2 max-h-[50vh]" />
             <audio v-if="type === ContentType.audio" :src="model" alt="Preview" class="w-full rounded-lg mx-auto mb-2"
                 controls />
-            <video v-if="type === ContentType.video" :src="model" alt="Preview" class="w-full rounded-lg mx-auto mb-2"
+            <video v-if="type === ContentType.video" :src="model" alt="Preview" class="rounded-lg mx-auto mb-2 max-h-[50vh]"
                 controls />
         </template>
         <div class="flex items-center gap-2">

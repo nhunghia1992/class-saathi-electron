@@ -33,7 +33,8 @@ onMounted(() => {
             finishRegister()
             device.addClicker(data.payload?.id, {
                 role: registerRole.value ?? ClickerRole.student,
-                highlight: false
+                highlight: false,
+                answers: []
             })
 
             // loop register another device until stop

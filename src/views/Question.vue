@@ -17,7 +17,7 @@ const questionAction = ref<'add' | 'edit'>('add')
 
 const deleteModal = ref<boolean>(false)
 
-const showAnswer = ref<boolean>(false)
+const isShowCorrectedChoice = ref<boolean>(false)
 
 const iconMap = {
     [ContentType.text]: PlusCircleIcon,
@@ -137,16 +137,16 @@ function handleConfirmDeleteQuestion() {
 </script>
 
 <template>
-    <div class="flex items-center gap-3 mb-3">
+    <div class="flex items-center gap-3 mb-3 w-full max-w-large">
         <h1 class="font-semibold text-lg">Question list</h1>
         <Button v-for="questionType in QuestionType" color="dark" size="small"
             @click="handleAddQuestion(questionType, null)">
             <PlusCircleIcon class="size-6 inline" />
             {{ questionType }}
         </Button>
-        <div class="flex items-center gap-2 absolute right-8 z-20">
-            <Button v-if="question.data.length" :color="showAnswer ? 'emerald' : 'dark'" size="small"
-                @click="showAnswer = !showAnswer">
+        <div class="flex items-center gap-2 fixed right-8 z-20">
+            <Button v-if="question.data.length" :color="isShowCorrectedChoice ? 'emerald' : 'dark'" size="small"
+                @click="isShowCorrectedChoice = !isShowCorrectedChoice">
                 <CheckCircleIcon class="size-6 inline" />
                 Show answer
             </Button>
@@ -159,10 +159,10 @@ function handleConfirmDeleteQuestion() {
 
     <RenderQuestion v-for="(questionData, index) in question.data"
         :title="`Question ${index + 1} (${questionData.type})`" :question="questionData" :is-preview="true"
-        :is-show-answer="showAnswer" @edit="handleEditQuestion(index)" @add="handleAddQuestion($event, index)"
-        @delete="handleDeleteQuestion(index)" />
+        :isShowCorrectedChoice="isShowCorrectedChoice" @edit="handleEditQuestion(index)" @add="handleAddQuestion($event, index)"
+        @delete="handleDeleteQuestion(index)" class="w-full max-w-6xl mx-auto" />
 
-    <Modal v-model="questionModal" size="full" static>
+    <Modal v-model="questionModal" size="large" static>
         <div class="flex items-center gap-2 mb-3">
             <div class="font-semibold text-lg underline">Question {{ questionSelected?.type }}</div>
             <div class="flex items-center gap-1">
