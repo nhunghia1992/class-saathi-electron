@@ -167,29 +167,33 @@ onBeforeUnmount(() => {
 
 <template>
     <div class="grid grid-cols-2 gap-3 items-center h-full">
-        <RenderQuestion v-if="question.currentQuestion" :question="question.currentQuestion"
-            :isShowCorrectedChoice="isShowCorrectedChoice" />
-        <div v-if="!isShowLeaderboard"
-            class="flex flex-wrap gap-2 items-center justify-center content-start overflow-auto h-full">
-            <Clicker v-for="clicker in device.studentClickers" :key="clicker.id" :clickerId="clicker.id"
-                :clickerInfo="clicker.info" :isPlaying="true" :isShowCorrectedChoice="isShowCorrectedChoice" />
+        <div class="flex flex-col justify-around h-full overflow-auto">
+            <RenderQuestion v-if="question.currentQuestion" :question="question.currentQuestion"
+                :isShowCorrectedChoice="isShowCorrectedChoice" />
         </div>
-        <div v-else class="flex flex-col justify-start gap-1 overflow-auto h-full">
-            <div class="text-center font-semibold text-3xl mb-2">Leaderboard</div>
-            <div class="flex bg-black/20 rounded-lg py-2 px-2 gap-2 font-semibold text-lg">
-                <div class="w-16 text-center">Rank</div>
-                <div class="w-20 text-center">Device</div>
-                <div>Name</div>
-                <div class="w-20 text-center ml-auto">Correct</div>
-                <div class="w-16 text-center">Time</div>
+        <div class="flex flex-col justify-around h-full overflow-auto">
+            <div v-if="!isShowLeaderboard"
+                class="flex flex-wrap gap-2 items-center justify-center content-start">
+                <Clicker v-for="clicker in device.studentClickers" :key="clicker.id" :clickerId="clicker.id"
+                    :clickerInfo="clicker.info" :isPlaying="true" :isShowCorrectedChoice="isShowCorrectedChoice" />
             </div>
-            <div v-for="(student, index) in device.studentLeaderboard"
-                class="flex bg-black/20 rounded-lg py-1 px-2 gap-2">
-                <div class="w-16 text-center font-semibold shrink-0">{{ index + 1 }}</div>
-                <div class="w-20 text-center font-semibold shrink-0">{{ student.info.order }}</div>
-                <div class="font-semibold truncate">{{ student.info.name }}</div>
-                <div class="w-20 text-center ml-auto shrink-0">{{ student.totalCorrected }}</div>
-                <div class="w-16 text-center shrink-0">{{ student.totalTime }}</div>
+            <div v-else class="flex flex-col justify-start gap-1">
+                <div class="text-center font-semibold text-3xl mb-2">Leaderboard</div>
+                <div class="flex bg-black/20 rounded-lg py-2 px-2 gap-2 font-semibold text-lg">
+                    <div class="w-16 text-center">Rank</div>
+                    <div class="w-20 text-center">Device</div>
+                    <div>Name</div>
+                    <div class="w-20 text-center ml-auto">Correct</div>
+                    <div class="w-16 text-center">Time</div>
+                </div>
+                <div v-for="(student, index) in device.studentLeaderboard"
+                    class="flex bg-black/20 rounded-lg py-1 px-2 gap-2">
+                    <div class="w-16 text-center font-semibold shrink-0">{{ index + 1 }}</div>
+                    <div class="w-20 text-center font-semibold shrink-0">{{ student.info.order }}</div>
+                    <div class="font-semibold truncate">{{ student.info.name }}</div>
+                    <div class="w-20 text-center ml-auto shrink-0">{{ student.totalCorrected }}</div>
+                    <div class="w-16 text-center shrink-0">{{ student.totalTime }}</div>
+                </div>
             </div>
         </div>
     </div>

@@ -143,11 +143,11 @@ const questionCorrectedPercent = computed<number>(() => {
             <!-- End Question contents -->
 
             <!-- Question choices -->
-            <div class="grid gap-3" :class="gridColClass[question.choiceColumn]">
+            <div class="grid gap-3 content-center" :class="gridColClass[question.choiceColumn]">
                 <div v-for="(choice, index) in questionChoicesOrder"
                     class="flex items-center justify-center gap-5 w-full max-w-3xl mx-auto bg-black/20 py-3 px-4 rounded-lg relative">
                     <div v-if="!isPreview && isShowCorrectedChoice"
-                        class="absolute right-1 top-1 text-xs bg-black/20 py-1 px-2 rounded-full font-semibold  ">
+                        class="absolute right-1 top-1 z-20 text-xs bg-black/20 py-1 px-2 rounded-full font-semibold  ">
                         {{ getChoiceCorrectedPercent(choice, index).toFixed(0) }}%
                         ({{ getChoiceCorrectedCount(choice, index) }}/{{ device.studentClickers.length }})
                     </div>
