@@ -34,8 +34,8 @@ const isStudentFinishedAnswer = computed<boolean>(() => {
         && isPlaying
         && question.currentQuestion
         && clickerInfo.answers[question.currentQuestionIndex]
-        && clickerInfo.answers[question.currentQuestionIndex].choices?.length > 0
-        && clickerInfo.answers[question.currentQuestionIndex].choices.length >= question.currentQuestion.choices.filter(choice => choice.isCorrected).length
+        && (clickerInfo.answers[question.currentQuestionIndex]?.choices.length || 0) > 0
+        && (clickerInfo.answers[question.currentQuestionIndex]?.choices.length || 0) >= (question.currentQuestion?.choices?.filter(choice => choice.isCorrected)?.length || 0)
     ) {
         return true
     }
